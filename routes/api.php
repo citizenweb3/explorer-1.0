@@ -3,6 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\DelegatorController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\ValidatorController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -17,3 +21,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+Route::get('/validators',[ValidatorController::class, 'get']);
+Route::get('/validators/{id}',[ValidatorController::class, 'id']);
+
+Route::post('/delegators',[DelegatorController::class, 'get']);
+Route::post('/events',[EventController::class, 'get']);
