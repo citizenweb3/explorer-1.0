@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('voting_power', 16, 6);
             $table->decimal('new_voting_power', 16, 6);
             $table->string('tx_hash');
-            $table->timestampTz('timestamp');
+            $table->timestamp('timestamp');
             $table->timestamps();
         });
     }
