@@ -14,7 +14,7 @@ class GetValidatorsEvents extends Command
      *
      * @var string
      */
-    protected $signature = 'get:validators-events';
+    protected $signature = 'get:validators-events {validator?}';
 
     /**
      * The console command description.
@@ -32,7 +32,16 @@ class GetValidatorsEvents extends Command
     {
         try {
 
-            $validators = Validator::where('status', 3)->get();
+            $validator = $this->argument('validator');
+
+            $validators = Validator::query()
+                ->when(!isset($validator), function ($query) {
+                    return $query->where('status', 3);
+                })
+                ->when(isset($validator), function ($query, $validator) {
+                    return $query->where('id', $validator);
+                })
+                ->get();
 
             $this->withProgressBar($validators, function($validator) {
 

@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Validator;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Console\Command;
 
 class GetValidatorsDelegators extends Command
@@ -11,7 +13,7 @@ class GetValidatorsDelegators extends Command
      *
      * @var string
      */
-    protected $signature = 'get:validators-delegators';
+    protected $signature = 'get:validators-delegators {validator?}';
 
     /**
      * The console command description.
@@ -29,16 +31,30 @@ class GetValidatorsDelegators extends Command
     {
         try {
 
-            $validators = Validator::where('status', 3)->get();
+            $validator = $this->argument('validator');
+
+            $validators = Validator::query()
+                ->when(!isset($validator), function ($query) {
+                    return $query->where('status', 3);
+                })
+                ->when(isset($validator), function ($query, $validator) {
+                    return $query->where('id', $validator);
+                })
+                ->get();
 
             $this->withProgressBar($validators, function($validator) {
 
                 do {
 
+                    $validator->delegators()->delete();
+
+                    $limit = 60;
+                    $offset = 0;
+
                     $validatorDelegators = Http::acceptJson()
                         ->get('https://api.mintscan.io/v1/cosmos/validators/'.$validator->operator_address.'/delegators', [
-                            'limit' => 60,
-                            'offset' => 0
+                            'limit' => $limit,
+                            'offset' => $offset
                         ])
                         ->throw()
                         ->json();
@@ -47,11 +63,13 @@ class GetValidatorsDelegators extends Command
                     // $validatorDelegators['created_at']
                     // $validatorDelegators['total_count']
 
-                    foreach ($validatorDelegators['delegators'] as $delegator) {
-                        $validator->delegators()->create($delegator);
+                    if (isset($validatorDelegators['delegators'])) {
+                        foreach ($validatorDelegators['delegators'] as $delegator) {
+                            $validator->delegators()->create($delegator);
+                        }
                     }
 
-                } while (!empty($validatorDelegators));
+                } while (isset($validatorDelegators['delegators']) && !empty($validatorDelegators['delegators']));
 
             });
 

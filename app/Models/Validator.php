@@ -30,4 +30,9 @@ class Validator extends Model
     {
         return $this->hasMany(ValidatorEvent::class);
     }
+
+    public function delegators()
+    {
+        return $this->hasMany(ValidatorDelegator::class);
+    }
 }
