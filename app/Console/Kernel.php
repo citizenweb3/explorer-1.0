@@ -15,8 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('get:validators')->hourly()->withoutOverlapping();
-        $schedule->command('get:validators-events')->daily()->withoutOverlapping();
+        $schedule->command('get:validators')->daily()->withoutOverlapping();
+        $schedule->command('get:validators-events')->everyFiveMinutes()->withoutOverlapping();
     }
 
     /**
